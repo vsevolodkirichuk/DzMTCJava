@@ -17,5 +17,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run time
+      - name: Run Local Time
         run: date +"%Y-%m-%d %H:%M:%S %Z"
