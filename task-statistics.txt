@@ -1,0 +1,5 @@
+Application shutdown. Total cached tasks: 2
+Application shutdown. Total cached tasks: 2
+Application shutdown. Total cached tasks: 2
+Application shutdown. Total cached tasks: 2
+Application shutdown. Total cached tasks: 2
