@@ -1,0 +1,124 @@
+package com.example.todolist.controller;
+
+import com.example.todolist.dto.TaskCreateDto;
+import com.example.todolist.dto.TaskResponseDto;
+import com.example.todolist.dto.TaskUpdateDto;
+import com.example.todolist.model.Priority;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.*;
+
+import java.time.LocalDate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class TaskControllerTest {
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    private TaskCreateDto validCreateDto() {
+        TaskCreateDto dto = new TaskCreateDto();
+        dto.setTitle("Test Task");
+        dto.setDescription("Description");
+        dto.setPriority(Priority.MEDIUM);
+        dto.setDueDate(LocalDate.now().plusDays(1));
+        return dto;
+    }
+
+    private TaskResponseDto createTask() {
+        return restTemplate.postForEntity("/api/tasks", validCreateDto(), TaskResponseDto.class).getBody();
+    }
+
+    @Test
+    void createTask_positive_returnsCreated() {
+        ResponseEntity<TaskResponseDto> response = restTemplate.postForEntity("/api/tasks", validCreateDto(), TaskResponseDto.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isNotNull();
+    }
+
+    @Test
+    void createTask_negative_blankTitle_returnsBadRequest() {
+        TaskCreateDto dto = new TaskCreateDto();
+        dto.setPriority(Priority.LOW);
+        ResponseEntity<String> response = restTemplate.postForEntity("/api/tasks", dto, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void createTask_negative_nullPriority_returnsBadRequest() {
+        TaskCreateDto dto = new TaskCreateDto();
+        dto.setTitle("Valid Title");
+        ResponseEntity<String> response = restTemplate.postForEntity("/api/tasks", dto, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void getAllTasks_positive_returnsOkWithXTotalCount() {
+        createTask();
+        ResponseEntity<TaskResponseDto[]> response = restTemplate.getForEntity("/api/tasks", TaskResponseDto[].class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getFirst("X-Total-Count")).isNotNull();
+    }
+
+    @Test
+    void getAllTasks_negative_wrongPath_returnsNotFound() {
+        ResponseEntity<String> response = restTemplate.getForEntity("/api/wrongpath", String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void getTaskById_positive_returnsTask() {
+        TaskResponseDto created = createTask();
+        ResponseEntity<TaskResponseDto> response = restTemplate.getForEntity("/api/tasks/" + created.getId(), TaskResponseDto.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getId()).isEqualTo(created.getId());
+    }
+
+    @Test
+    void getTaskById_negative_notFound() {
+        ResponseEntity<String> response = restTemplate.getForEntity("/api/tasks/99999", String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void updateTask_positive_returnsUpdated() {
+        TaskResponseDto created = createTask();
+        TaskUpdateDto update = new TaskUpdateDto();
+        update.setTitle("Updated Title");
+        HttpEntity<TaskUpdateDto> request = new HttpEntity<>(update);
+        ResponseEntity<TaskResponseDto> response = restTemplate.exchange(
+                "/api/tasks/" + created.getId(), HttpMethod.PUT, request, TaskResponseDto.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getTitle()).isEqualTo("Updated Title");
+    }
+
+    @Test
+    void updateTask_negative_notFound() {
+        TaskUpdateDto update = new TaskUpdateDto();
+        update.setTitle("Title");
+        HttpEntity<TaskUpdateDto> request = new HttpEntity<>(update);
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/tasks/99999", HttpMethod.PUT, request, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void deleteTask_positive_returnsNoContent() {
+        TaskResponseDto created = createTask();
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/api/tasks/" + created.getId(), HttpMethod.DELETE, null, Void.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
+
+    @Test
+    void deleteTask_negative_notFound() {
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/tasks/99999", HttpMethod.DELETE, null, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+}
