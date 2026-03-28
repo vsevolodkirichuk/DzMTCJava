@@ -1,0 +1,21 @@
+# Basic Workflow
+
+name: Simple CI job
+
+on:
+
+  push:
+  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+  
+  build:
+   
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Local Time
+        run: date +"%Y-%m-%d %H:%M:%S %Z"
