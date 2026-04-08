@@ -21,4 +21,7 @@
 *.tar.gz
 *.rar
 
+hw3/uploads/
+hw3/target/
+.env.example
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml

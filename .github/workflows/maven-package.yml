@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 21          # Я ее поставил изначально на новый ноут
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -25,10 +25,10 @@ jobs:
           cache: maven
 
       - name: Build and run tests
-        run: mvn --batch-mode clean verify -f hw2/pom.xml
+        run: mvn --batch-mode clean verify -f hw3/pom.xml -Dspring.profiles.active=test
 
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          files: hw2/target/surefire-reports/*.xml
+          files: hw3/target/surefire-reports/*.xml
