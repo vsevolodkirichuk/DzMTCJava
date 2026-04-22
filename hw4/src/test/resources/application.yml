@@ -4,7 +4,7 @@ app:
     expiration-ms: 3600000
     pepper: "s3cur3P3pp3r!"
   external-api:
-    base-url: http://localhost:${local.server.port}/external/v1
+    base-url: http://localhost:8080/external/v1
 
 resilience4j:
   circuitbreaker:
