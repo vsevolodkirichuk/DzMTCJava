@@ -1,7 +1,9 @@
 # Compiled class file
 *.class
 
-/idea
+.idea/
+**/target/
+uploads/
 
 # Log file
 *.log
@@ -12,7 +14,7 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files # !!!
+# Package Files #
 *.jar
 *.war
 *.nar
@@ -21,4 +23,9 @@
 *.tar.gz
 *.rar
 
+/hw3
+/hw4
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+
+build/
+local.properties
